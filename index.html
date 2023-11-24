@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match</title>
+    <style>
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            gap: 10px;
+        }
+
+        .card {
+            width: 80px;
+            height: 80px;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-board"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const symbols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        const cards = [...symbols, ...symbols]; // Duplica os símbolos para criar pares
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        // Embaralha as cartas
+        cards.sort(() => Math.random() - 0.5);
+
+        const gameBoard = document.getElementById('game-board');
+
+        function createGameBoard() {
+            for (let i = 0; i < cards.length; i++) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.setAttribute('data-index', i);
+                card.addEventListener('click', handleCardClick);
+                gameBoard.appendChild(card);
+            }
+        }
+
+        function handleCardClick() {
+            const selectedCard = this;
+            const index = selectedCard.getAttribute('data-index');
+
+            // Impede a seleção de cartas já viradas ou mais de duas cartas ao mesmo tempo
+            if (flippedCards.length < 2 && !flippedCards.includes(index)) {
+                flippedCards.push(index);
+                updateCardView(selectedCard);
+
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 500);
+                }
+            }
+        }
+
+        function updateCardView(card) {
+            const index = card.getAttribute('data-index');
+            card.innerHTML = cards[index];
+            card.style.backgroundColor = '#fff';
+        }
+
+        function checkMatch() {
+            const [index1, index2] = flippedCards;
+            const card1 = document.querySelector(`[data-index="${index1}"]`);
+            const card2 = document.querySelector(`[data-index="${index2}"]`);
+
+            if (cards[index1] === cards[index2]) {
+                // Cartas iguais
+                matchedPairs++;
+
+                if (matchedPairs === symbols.length) {
+                    // Todas as cartas foram encontradas
+                    alert('Parabéns! Você encontrou todos os pares.');
+                    resetGame();
+                }
+            } else {
+                // Cartas diferentes, esconde as cartas novamente
+                card1.innerHTML = '';
+                card2.innerHTML = '';
+                card1.style.backgroundColor = '#ddd';
+                card2.style.backgroundColor = '#ddd';
+            }
+
+            flippedCards = [];
+        }
+
+        function resetGame() {
+            gameBoard.innerHTML = '';
+            flippedCards = [];
+            matchedPairs = 0;
+
+            cards.sort(() => Math.random() - 0.5);
+            createGameBoard();
+        }
+
+        createGameBoard();
+    });
+</script>
+
+</body>
+</html>
